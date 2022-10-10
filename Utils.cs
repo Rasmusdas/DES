@@ -8,6 +8,8 @@ namespace DataEncryptionStandard
 {
     public static class Utils
     {
+
+        public static bool verbose = true;
         public static string AsString(this BitArray arr)
         {
             string res = "";
@@ -18,6 +20,14 @@ namespace DataEncryptionStandard
             }
 
             return res;
+        }
+
+        public static void Log(object obj)
+        {
+            if(verbose)
+            {
+                Console.WriteLine(obj.ToString());
+            }
         }
 
         public static BitArray Reverse(this BitArray arr)

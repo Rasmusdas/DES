@@ -4,19 +4,27 @@
     {
         public static void Main(string[] args)
         {
-            BitArray key = DES.FromValue(0x0123456789abcdef, 64);
-            BitArray message = DES.FromValue(0x4e6f772069732074, 64);
+            BitArray key = DES.FromValue(0x3b3898371520f75e, 64);
+            BitArray message = DES.FromValue(0x9e2525bea44284ac, 64);
+
+            Console.WriteLine("Input:");
+
+            Console.WriteLine("Message: " + DESKeyScheduler.ToPrint(message.Reverse().AsLong(), 8, 64));
+
+            Console.WriteLine("Key: " + DESKeyScheduler.ToPrint(key.Reverse().AsLong(), 8, 64));
+
+            Console.WriteLine("\n--------------------------------------------------------------------\n");
 
             key = key.Reverse();
             message = message.Reverse();
 
-            DESKeyScheduler scheduler = new DESKeyScheduler(key, 16);
+            DESKeyScheduler scheduler = new DESKeyScheduler(key, 4);
 
             scheduler.GenerateKeys();
         
             DES des = new(scheduler);
 
-            Console.WriteLine(des.Crypt(key, message, 16).Reverse().AsLong().ToString("x"));
+            Console.WriteLine("Output: " + DESKeyScheduler.ToPrint(des.Crypt(key, message, 4,true).Reverse().AsLong(),8,64));
 
             //Console.WriteLine("Message:");
             //Console.WriteLine(DESKeyScheduler.ToPrint(message.AsLong()) + "\n");

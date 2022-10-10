@@ -86,14 +86,14 @@ namespace DES
             return res;
         }
 
-        public BitArray GetKey(int round)
+        public BitArray GetKey(int round, bool decrypt = false)
         {
             if(_keys == null)
             {
                 _keys = _GenerateKeys();
             }
 
-            return _keys[round];
+            return _keys[decrypt ? _rounds-1-round : round];
         }
 
         public static string ToPrint(long v1, int n = 4, int len = 64)

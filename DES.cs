@@ -15,7 +15,7 @@ namespace DataEncryptionStandard
         int[] p = { 16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10, 2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25 };
         int[] ipRev = { 40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31, 38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29, 36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27, 34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25 };
 
-        public int[,,] sBox =  
+        public int[,,] sBox =
 
                         {{{14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7},
                         {0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8},
@@ -139,7 +139,7 @@ namespace DataEncryptionStandard
                 throw new ArgumentException("Arr size must be 4");
             }
 
-            return FromValue(sBox[sBoxNum, row, arr.AsInt()],4);
+            return FromValue((uint)sBox[sBoxNum, row, (uint)arr.AsInt()], 4);
         }
 
         public BitArray SBox(BitArray arr, int sBoxNum)
@@ -158,12 +158,12 @@ namespace DataEncryptionStandard
                 resArr[i] = arr[i + 1];
             }
 
-            return FromValue(sBox[sBoxNum, row, resArr.AsInt()],4);
+            return FromValue((uint)sBox[sBoxNum, row, (uint)resArr.AsInt()], 4);
         }
 
         public BitArray[] Split(BitArray arr, int n)
         {
-            if(arr.Length % n != 0)
+            if (arr.Length % n != 0)
             {
                 throw new ArgumentException("Arr must be divisible into n equal parts");
             }
@@ -183,9 +183,8 @@ namespace DataEncryptionStandard
             return res;
         }
 
-        public BitArray Crypt(BitArray key, BitArray message, int round)
+        public BitArray Crypt(BitArray key, BitArray message, int round, bool decrypt)
         {
-            Console.WriteLine(message.AsLong().ToString("x"));
             message = InitialPermutation(message);
 
             for (int r = 0; r < round; r++)
@@ -194,7 +193,15 @@ namespace DataEncryptionStandard
 
                 var expanded = Expand(splitMess[1]);
 
-                var expandedXOR = expanded.Xor(_scheduler.GetKey(r));
+                Utils.Log("Round " + r + ":");
+
+                Utils.Log("Key:");
+                Utils.Log(DESKeyScheduler.ToPrint(_scheduler.GetKey(r,decrypt).AsLong(), 6, 48));
+
+                Utils.Log("Message:");
+                Utils.Log(DESKeyScheduler.ToPrint(expanded.AsLong(), 6, 48));
+
+                var expandedXOR = expanded.Xor(_scheduler.GetKey(r,decrypt));
 
                 expandedXOR = expandedXOR.Reverse();
 
@@ -228,7 +235,8 @@ namespace DataEncryptionStandard
                     message = splitMess[1].Append(final);
                 }
 
-                Console.WriteLine("Round " + r + ": " + message.Reverse().AsLong().ToString("x"));
+                Utils.Log("Round Output:\n" + DESKeyScheduler.ToPrint(message.Reverse().AsLong(),8,64));
+                Utils.Log("\n--------------------------------------------------------------------\n");
 
             }
             return FinalPermutation(message);
@@ -257,7 +265,7 @@ namespace DataEncryptionStandard
         }
 
 
-        public static BitArray FromValue(int val, int n)
+        public static BitArray FromValue(uint val, int n)
         {
             BitArray res = new BitArray(n);
 
@@ -270,7 +278,7 @@ namespace DataEncryptionStandard
             return res;
         }
 
-        public static BitArray FromValue(long val, int n)
+        public static BitArray FromValue(ulong val, int n)
         {
             BitArray res = new BitArray(n);
 
