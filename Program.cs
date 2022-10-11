@@ -2,29 +2,61 @@
 {
     internal class Program
     {
+
+        static ulong diff = 0x0080820060000000;
+        static ulong diffOut = 0x6000000000000000;
+
         public static void Main(string[] args)
         {
-            BitArray key = DES.FromValue(0x3b3898371520f75e, 64);
-            BitArray message = DES.FromValue(0x9e2525bea44284ac, 64);
 
-            Console.WriteLine("Input:");
+            int prob = 0;
+            for (int i = 0; i < 10000; i++)
+            {
+                BitArray key = GenerateRandom(64);
+                BitArray message = GenerateRandom(64);
+                BitArray messageCopy = message.DeepCopy();
+                messageCopy = messageCopy.Xor(DES.FromValue(diff,64));
 
-            Console.WriteLine("Message: " + DESKeyScheduler.ToPrint(message.Reverse().AsLong(), 8, 64));
+                key = key.Reverse();
+                message = message.Reverse();
+                messageCopy = messageCopy.Reverse();
 
-            Console.WriteLine("Key: " + DESKeyScheduler.ToPrint(key.Reverse().AsLong(), 8, 64));
+                DESKeyScheduler scheduler = new DESKeyScheduler(key, 2);
 
-            Console.WriteLine("\n--------------------------------------------------------------------\n");
+                scheduler.GenerateKeys();
 
-            key = key.Reverse();
-            message = message.Reverse();
+                DES des = new(scheduler);
 
-            DESKeyScheduler scheduler = new DESKeyScheduler(key, 4);
+                BitArray ciph1 = des.Crypt(key,message,2, false);
+                BitArray ciph2 = des.Crypt(key, messageCopy,2, false);
 
-            scheduler.GenerateKeys();
-        
-            DES des = new(scheduler);
+                BitArray res = ciph1.Xor(ciph2);
+                
+                if(Same(DES.FromValue(diffOut, 64).Reverse(), res))
+                {
+                    prob++;
+                }
 
-            Console.WriteLine("Output: " + DESKeyScheduler.ToPrint(des.Crypt(key, message, 4,true).Reverse().AsLong(),8,64));
+
+
+
+
+                //Console.WriteLine("Input:");
+
+                //Console.WriteLine("Message: " + DESKeyScheduler.ToPrint(message.Reverse().AsLong(), 8, 64));
+
+                //Console.WriteLine("Key: " + DESKeyScheduler.ToPrint(key.Reverse().AsLong(), 8, 64));
+
+                //Console.WriteLine("\n--------------------------------------------------------------------\n");
+
+
+
+                
+            }
+
+            Console.WriteLine(prob/10000.0);
+
+
 
             //Console.WriteLine("Message:");
             //Console.WriteLine(DESKeyScheduler.ToPrint(message.AsLong()) + "\n");
@@ -119,6 +151,31 @@
             //{
             //    Console.WriteLine(v.AsString());
             //}
+        }
+
+        public static BitArray GenerateRandom(int n)
+        {
+            BitArray arr = new BitArray(n);
+
+            for (int i = 0; i < n; i++)
+            {
+                arr[i] = Random.Shared.Next(0, 2) == 1 ? true : false;
+            }
+
+            return arr;
+        }
+
+        public static bool Same(BitArray arr1, BitArray arr2)
+        {
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (arr1[i] != arr2[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

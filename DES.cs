@@ -185,7 +185,7 @@ namespace DataEncryptionStandard
 
         public BitArray Crypt(BitArray key, BitArray message, int round, bool decrypt)
         {
-            message = InitialPermutation(message);
+            //message = InitialPermutation(message);
 
             for (int r = 0; r < round; r++)
             {
@@ -239,7 +239,7 @@ namespace DataEncryptionStandard
                 Utils.Log("\n--------------------------------------------------------------------\n");
 
             }
-            return FinalPermutation(message);
+            return message;
         }
 
         public BitArray SBox(BitArray[] arr)

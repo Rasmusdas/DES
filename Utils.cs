@@ -9,7 +9,7 @@ namespace DataEncryptionStandard
     public static class Utils
     {
 
-        public static bool verbose = true;
+        public static bool verbose = false;
         public static string AsString(this BitArray arr)
         {
             string res = "";
@@ -107,6 +107,18 @@ namespace DataEncryptionStandard
             for (int i = 0; i < arr2.Length; i++)
             {
                 res[arr.Length + i] = arr2[i];
+            }
+
+            return res;
+        }
+
+        public static BitArray DeepCopy(this BitArray arr)
+        {
+            BitArray res = new BitArray(arr.Count);
+
+            for (int i = 0;i < arr.Count; i++)
+            {
+                res[i] = arr[i];
             }
 
             return res;
